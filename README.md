@@ -49,8 +49,8 @@ envia apenas ações permitidas e acompanha o estado até o resultado — com **
 ## Como configurar e executar
 
 ```bash
-git clone <url-do-repositorio>
-cd domino-quina-cliente
+git clone https://github.com/VicxMouraM/CP6-C.git
+cd CP6-C
 dotnet restore
 dotnet build
 ```
