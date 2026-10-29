@@ -14,10 +14,16 @@
 
     @foreach (var p in _partidas)
     {
-      <button class="mesa-item @(p.PartidaId == _selecionada?.PartidaId ? "selecionada" : string.Empty)" @onclick="() => _selecionada = p">
+      var minha = EhMinha(p.PartidaId);
+      <button class="mesa-item @(minha ? "minha" : string.Empty) @(p.PartidaId == _selecionada?.PartidaId ? "selecionada" : string.Empty)"
+              @onclick="() => SelecionarMesa(p)">
         <span class="icone-pessoas">👥</span> 1/2
         <span class="sep"></span>
         Até @p.PontuacaoAlvo
+        @if (minha)
+        {
+          <span class="selo-minha">Sua mesa</span>
+        }
         <span class="seta">›</span>
       </button>
     }
@@ -104,6 +110,9 @@
   private PerfilJogador? _jogador;
   private PartidaDisponivel? _selecionada;
   private int _alvo = 50;
+
+  // Mesas em que o perfil atual já participa (descoberto consultando o estado privado: 200 = participo).
+  private readonly Dictionary<(Guid Partida, Guid Jogador), bool> _participacao = [];
   private string? _mensagem;
   private bool _erro;
   private bool _naoAutenticado;
@@ -154,9 +163,46 @@
     }
   }
 
+  private bool EhMinha(Guid partidaId) =>
+    _jogador is not null && _participacao.TryGetValue((partidaId, _jogador.JogadorId), out var sim) && sim;
+
+  private void SelecionarMesa(PartidaDisponivel p)
+  {
+    if (EhMinha(p.PartidaId))
+    {
+      Nav.NavigateTo($"/mesa/{p.PartidaId}?jogador={_jogador!.JogadorId}");
+      return;
+    }
+
+    _selecionada = p;
+  }
+
+  private async Task DescobrirMinhasMesasAsync()
+  {
+    if (_jogador is null)
+    {
+      return;
+    }
+
+    foreach (var p in _partidas.Where(p => !_participacao.ContainsKey((p.PartidaId, _jogador.JogadorId))).ToList())
+    {
+      try
+      {
+        await Api.ObterEstadoAsync(p.PartidaId, _jogador.JogadorId, _cts.Token);
+        _participacao[(p.PartidaId, _jogador.JogadorId)] = true;
+        Credenciais.RegistrarPartida(p.PartidaId, _jogador.JogadorId);
+      }
+      catch (ApiException ex) when (ex.StatusCode is System.Net.HttpStatusCode.NotFound or System.Net.HttpStatusCode.Forbidden)
+      {
+        _participacao[(p.PartidaId, _jogador.JogadorId)] = false;
+      }
+    }
+  }
+
   private async Task AtualizarListaAsync()
   {
     _partidas = await Api.ListarPartidasAsync(_cts.Token);
+    await DescobrirMinhasMesasAsync();
     if (_selecionada is not null)
     {
       _selecionada = _partidas.FirstOrDefault(p => p.PartidaId == _selecionada.PartidaId);
@@ -172,6 +218,7 @@
     {
       _jogador = _ativos.FirstOrDefault(p => p.JogadorId == id) ?? _jogador;
       AtualizarRecentes();
+      _ = InvokeAsync(async () => { await DescobrirMinhasMesasAsync(); StateHasChanged(); });
     }
   }
 
@@ -179,6 +226,14 @@
   {
     await Executar(async () =>
     {
+      var existente = _partidas.FirstOrDefault(p => EhMinha(p.PartidaId));
+      if (existente is not null)
+      {
+        // A API não permite abrir outra mesa enquanto o perfil já espera em uma: retoma a existente.
+        Nav.NavigateTo($"/mesa/{existente.PartidaId}?jogador={_jogador!.JogadorId}");
+        return;
+      }
+
       using var sessao = await SessaoPartida.CriarPartidaAsync(Api, _jogador!.JogadorId, _alvo);
       Credenciais.RegistrarPartida(sessao.PartidaId, _jogador.JogadorId);
       Nav.NavigateTo($"/mesa/{sessao.PartidaId}?jogador={_jogador.JogadorId}");
@@ -201,6 +256,11 @@
     try
     {
       await acao();
+    }
+    catch (ApiException ex) when (ex.Codigo == "ESTADO_INVALIDO")
+    {
+      await AtualizarListaAsync();
+      Erro("Este perfil já participa de uma partida aberta. Clique na mesa marcada como “Sua mesa” para continuar, ou use outro perfil.");
     }
     catch (ApiException ex)
     {

@@ -13,7 +13,7 @@ public class SerializacaoTests
         const string json = """
             {"partidaId":"aaaaaaaa-0000-0000-0000-000000000001","versaoEstado":7,"situacao":1,"numeroRodada":2,
              "minhaMao":[{"valorA":6,"valorB":1}],"tabuleiro":[{"valorA":3,"valorB":3}],
-             "participantes":[{"jogadorId":"bbbbbbbb-0000-0000-0000-000000000002","pontuacao":12,"quantidadePedras":4}],
+             "participantes":[{"jogadorId":"bbbbbbbb-0000-0000-0000-000000000002","nome":"VicMoura","pontuacao":12,"quantidadePedrasNaMao":4,"ehVez":true}],
              "proximaAcao":1,"pedraAberturaObrigatoria":{"valorA":6,"valorB":6},"pontuacaoAlvo":50}
             """;
 
@@ -30,6 +30,8 @@ public class SerializacaoTests
         var participante = Assert.Single(estado.Participantes!);
         Assert.Equal(12, participante.PontosNoPlacar);
         Assert.Equal(4, participante.PedrasNaMao);
+        Assert.True(participante.EhVez);
+        Assert.Equal("VicMoura", participante.NomeExibicao);
     }
 
     [Fact]

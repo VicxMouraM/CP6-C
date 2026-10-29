@@ -534,7 +534,8 @@ public sealed class MotorSimulador
         nome = _jogadores.GetValueOrDefault(x.JogadorId)?.Nome,
         posicao = x.Posicao,
         pontuacao = x.Pontos,
-        quantidadePedras = x.Mao.Count,
+        quantidadePedrasNaMao = x.Mao.Count,
+        ehVez = p.Situacao == 1 && p.Participantes.IndexOf(x) == p.Turno,
     }).ToList();
 
     private Partida PartidaDoJogador(Guid partidaId, Guid jogadorId)

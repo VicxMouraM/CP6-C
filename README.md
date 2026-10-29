@@ -6,6 +6,11 @@ envia apenas ações permitidas e acompanha o estado até o resultado — com **
 
 ![Mesa durante o turno](docs/telas/mesa.png)
 
+> **Checkpoint 6 — entrega até 02/11/2026, 23:59.**
+> 🎥 **Vídeo de apresentação:** _cole aqui o link do vídeo_
+>
+> **Integrantes:** _Nome Completo (RM00000)_ · _Nome Completo (RM00000)_ · _Nome Completo (RM00000)_
+
 ---
 
 ## Sumário
@@ -36,7 +41,7 @@ envia apenas ações permitidas e acompanha o estado até o resultado — com **
 | Simulador local da API (mesmo contrato) para testes e ensaio offline | `tools/DominoQuina.Simulador` |
 | Testes automatizados (xUnit): 76 casos de unidade e integração ponta a ponta | `tests/DominoQuina.Tests` |
 | Diagrama de classes | [`docs/diagrama-classes.md`](docs/diagrama-classes.md) e [`.png`](docs/diagrama-classes.png) |
-| Roteiro da apresentação | [`docs/roteiro-apresentacao.md`](docs/roteiro-apresentacao.md) |
+| Roteiro do vídeo de apresentação | [`docs/roteiro-video.md`](docs/roteiro-video.md) |
 
 ## Requisitos
 
@@ -65,8 +70,10 @@ Abra **http://localhost:5080**. O endereço padrão da API já vem configurado:
 https://domino-quina-api-b1-pf2261.azurewebsites.net
 ```
 
-Para usar outro endereço (por exemplo o do slide), altere em **Conta → Configuração** ou pela linha de comando:
-`dotnet run --project src/DominoQuina.Cli -- url https://outro-endereco`.
+Swagger: <https://domino-quina-api-b1-pf2261.azurewebsites.net/swagger>.
+O enunciado também cita `https://domino-quina-atbkg6ckcwbpd5gz.westus3-01.azurewebsites.net`. Para trocar, use
+**Conta → Configuração** (informe só o endereço base, **sem** `/swagger`) ou a linha de comando:
+`dotnet run --project src/DominoQuina.Cli -- url https://outro-endereco`. Cada servidor tem contas próprias, então um token de um não vale no outro.
 
 ### Onde ficam o token e as chaves
 
@@ -93,6 +100,9 @@ DOMINO_QUINA_HOME=/tmp/cliente2 dotnet run --project src/DominoQuina.Web --urls 
    mesma chave; *Liberar* chama `desativar-cliente` para usar o perfil em outro cliente.
 3. **Partidas** — escolha a pontuação alvo e crie a mesa, ou selecione uma mesa com vaga e clique em *Entrar na partida*.
    A lista se atualiza a cada 3 s e a vaga é revalidada pela API no ingresso.
+   Mesas em que o perfil atual já participa aparecem com o selo **Sua mesa**: clicar nelas reabre a partida.
+   A API não deixa o mesmo perfil abrir uma segunda mesa enquanto já espera em outra, por isso
+   *Criar partida* retoma a mesa existente nesse caso.
 4. **Mesa** — quando houver dois jogadores, clique em *Iniciar*. Na sua vez:
    - pedras que encaixam ficam destacadas; as outras ficam apagadas;
    - clique na pedra para jogar; se ela couber nas duas pontas, aparecem os botões **◀ aqui** e **aqui ▶**;
@@ -180,7 +190,7 @@ domino-quina-cliente/
 │   └── DominoQuina.Cli/           # comandos de terminal e modo autônomo
 ├── tools/DominoQuina.Simulador/   # simulador da API
 ├── tests/DominoQuina.Tests/       # xUnit
-└── docs/                          # diagrama de classes, telas, roteiro
+└── docs/                          # diagrama de classes, telas, roteiro do vídeo
 ```
 
 Veja o [diagrama de classes](docs/diagrama-classes.md) completo.
@@ -244,7 +254,7 @@ Ele responde em menos de 1 segundo — bem abaixo dos 10 segundos da regra futur
 |---|---|---|
 | Documentação do código e README | 5% | Este README + XML docs em `DominoQuina.Core`. |
 | Respeito às convenções | 5% | `.editorconfig`, analisadores, padrões .NET. |
-| Apresentação na aula | 10% | [`docs/roteiro-apresentacao.md`](docs/roteiro-apresentacao.md). |
+| Vídeo de apresentação | 10% | Link no topo deste README; roteiro em [`docs/roteiro-video.md`](docs/roteiro-video.md). |
 | Diagrama de classes | 10% | [`docs/diagrama-classes.md`](docs/diagrama-classes.md). |
 | Conexão funcional com a API e registro de usuário e jogador | 15% | Telas Conta e Perfis; `GerenciadorPerfis`; `DominoApiClient`. |
 | Partidas executadas com o estado correto na tela | 20% | Tela Mesa; `SessaoPartida` (versões, 409, 422, 204). |

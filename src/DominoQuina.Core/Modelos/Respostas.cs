@@ -61,8 +61,11 @@ public sealed class ResumoParticipantePartida : ModeloExtensivel
     /// <summary>Campo <c>pontuacao</c>, quando enviado com esse nome.</summary>
     public int? Pontuacao { get; set; }
 
-    /// <summary>Campo <c>quantidadePedras</c>, quando enviado com esse nome.</summary>
-    public int? QuantidadePedras { get; set; }
+    /// <summary>Campo <c>quantidadePedrasNaMao</c> (nome usado pela API oficial).</summary>
+    public int? QuantidadePedrasNaMao { get; set; }
+
+    /// <summary>Campo <c>ehVez</c>: indica se é a vez deste participante (nome usado pela API oficial).</summary>
+    public bool? EhVez { get; set; }
 
     /// <summary>
     /// Pontuação acumulada na partida (placar). Usa <see cref="Pontuacao"/> ou procura nomes alternativos.
@@ -78,8 +81,8 @@ public sealed class ResumoParticipantePartida : ModeloExtensivel
 
     /// <summary>Quantidade de pedras que o participante tem na mão (sem revelar quais).</summary>
     [JsonIgnore]
-    public int? PedrasNaMao => QuantidadePedras ?? BuscarInteiro(
-        ["quantidadePecas", "quantidadePedrasNaMao", "quantidadePecasNaMao",
+    public int? PedrasNaMao => QuantidadePedrasNaMao ?? BuscarInteiro(
+        ["quantidadePedras", "quantidadePecas", "quantidadePecasNaMao",
          "pedrasNaMao", "pecasNaMao", "totalPedras", "totalPecas", "tamanhoMao", "quantidadeMao"],
         ["quant", "ped"], ["quant", "pec"], ["mao"], ["total", "ped"], ["total", "pec"]);
 

@@ -2,11 +2,11 @@
   "profiles": {
     "DominoQuina.Simulador": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
+      "commandLineArgs": "http://localhost:5199",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:54881;http://localhost:54882"
+      }
     }
   }
 }

@@ -127,6 +127,7 @@ input:focus, select:focus { outline: 2px solid var(--rosa); outline-offset: 1px;
   padding: .9rem 1rem; border-radius: 10px; border: 1px solid var(--borda);
   background: #17171a; color: var(--texto); font: inherit; cursor: pointer; text-align: left;
 }
+.mesa-item { white-space: nowrap; }
 .mesa-item .sep { width: 1px; height: 18px; background: var(--borda); }
 .mesa-item .seta { margin-left: auto; color: var(--sutil); }
 .mesa-item.selecionada { border-color: var(--rosa); box-shadow: 0 0 0 1px var(--rosa), 0 0 18px rgba(237, 20, 91, .25); }
@@ -247,3 +248,7 @@ input:focus, select:focus { outline: 2px solid var(--rosa); outline-offset: 1px;
   .faixa-inferior { flex-direction: column; }
   .botoes-acao { flex-direction: row; flex-wrap: wrap; justify-content: center; }
 }
+
+.mesa-item.minha { border-color: rgba(47, 191, 113, .55); }
+.selo-minha { margin-left: auto; white-space: nowrap; font-size: .72rem; padding: .15rem .5rem; border-radius: 999px; background: rgba(47, 191, 113, .15); color: var(--verde); }
+.mesa-item.minha .seta { margin-left: .4rem; }
