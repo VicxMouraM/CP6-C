@@ -1,0 +1,232 @@
+@page "/sala"
+@implements IDisposable
+@inject IDominoApi Api
+@inject GerenciadorPerfis Perfis
+@inject ICredenciaisCliente Credenciais
+@inject NavigationManager Nav
+
+<PageTitle>Partidas · Dominó Ponta de Quina</PageTitle>
+
+<section class="sala">
+  <aside class="painel lista-mesas">
+    <h1>Partidas</h1>
+    <p class="sutil">Escolha uma mesa e jogue</p>
+
+    @foreach (var p in _partidas)
+    {
+      <button class="mesa-item @(p.PartidaId == _selecionada?.PartidaId ? "selecionada" : string.Empty)" @onclick="() => _selecionada = p">
+        <span class="icone-pessoas">👥</span> 1/2
+        <span class="sep"></span>
+        Até @p.PontuacaoAlvo
+        <span class="seta">›</span>
+      </button>
+    }
+    @if (_partidas.Count == 0)
+    {
+      <p class="sutil pequeno">Nenhuma mesa aguardando adversário. Crie uma!</p>
+    }
+
+    <h3>Criar mesa</h3>
+    <div class="alvos">
+      @foreach (var alvo in new[] { 50, 100, 150 })
+      {
+        <button class="chip @(_alvo == alvo ? "ativo" : string.Empty)" @onclick="() => _alvo = alvo">Até @alvo</button>
+      }
+      <input type="number" min="1" class="alvo-livre" @bind="_alvo" />
+    </div>
+    <button class="botao primario largo" disabled="@(_ocupado || _jogador is null)" @onclick="CriarAsync">Criar partida</button>
+
+    @if (_recentes.Count > 0)
+    {
+      <h3>Retomar</h3>
+      @foreach (var r in _recentes)
+      {
+        <a class="recente" href="@($"/mesa/{r.PartidaId}?jogador={r.JogadorId}")">
+          @r.PartidaId.ToString()[..8]… <span class="sutil pequeno">@r.RegistradaEm.ToLocalTime().ToString("dd/MM HH:mm")</span>
+        </a>
+      }
+    }
+  </aside>
+
+  <div class="mesa-vitrine">
+    <div class="feltro oval">
+      <div class="lugar-vazio">
+        <div class="avatar tracejado">?</div>
+        <span>Aguardando<br />jogador</span>
+      </div>
+      <div class="vitrine-pedras">
+        <Pedra A="1" B="1" /><Pedra A="2" B="2" /><Pedra A="2" B="3" /><Pedra A="6" B="6" Vertical="true" /><Pedra A="6" B="3" /><Pedra A="3" B="1" /><Pedra A="1" B="5" />
+      </div>
+    </div>
+  </div>
+
+  <aside class="painel cartao-jogador">
+    @if (_jogador is not null)
+    {
+      <div class="avatar enorme">@Inicio.Iniciais(_jogador.Nome)</div>
+      <h2>@_jogador.Nome</h2>
+      <p class="sutil">Pronto para jogar</p>
+      <select @onchange="TrocarPerfil">
+        @foreach (var p in _ativos)
+        {
+          <option value="@p.JogadorId" selected="@(p.JogadorId == _jogador.JogadorId)">@p.Nome</option>
+        }
+      </select>
+      <hr />
+      <span class="sutil pequeno">Mesa selecionada</span>
+      @if (_selecionada is not null)
+      {
+        <div class="info-mesa"><span>👥 1/2</span><span>🎯 Até @_selecionada.PontuacaoAlvo</span></div>
+        <button class="botao primario largo grande" disabled="@_ocupado" @onclick="EntrarAsync">Entrar na partida ›</button>
+      }
+      else
+      {
+        <p class="sutil">Selecione uma mesa à esquerda.</p>
+      }
+    }
+    else
+    {
+      <h2>Nenhum perfil ativo</h2>
+      <p class="sutil">Ative um perfil neste cliente para criar ou entrar em partidas.</p>
+      <a class="botao primario" href="/perfis">Ir para perfis</a>
+    }
+    <Aviso Mensagem="@_mensagem" Erro="@_erro" NaoAutenticado="@_naoAutenticado" />
+  </aside>
+</section>
+
+@code {
+  [SupplyParameterFromQuery(Name = "jogador")] public Guid? JogadorQuery { get; set; }
+
+  private readonly CancellationTokenSource _cts = new();
+  private IReadOnlyList<PartidaDisponivel> _partidas = [];
+  private IReadOnlyList<PartidaRecente> _recentes = [];
+  private List<PerfilJogador> _ativos = [];
+  private PerfilJogador? _jogador;
+  private PartidaDisponivel? _selecionada;
+  private int _alvo = 50;
+  private string? _mensagem;
+  private bool _erro;
+  private bool _naoAutenticado;
+  private bool _ocupado;
+
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      var perfis = await Perfis.ListarAsync();
+      _ativos = perfis.Where(p => p.AtivoNesteCliente).Select(p => p.Perfil).ToList();
+      _jogador = _ativos.FirstOrDefault(p => p.JogadorId == JogadorQuery) ?? _ativos.FirstOrDefault();
+      AtualizarRecentes();
+      await AtualizarListaAsync();
+    }
+    catch (ApiException ex)
+    {
+      Erro(ex.Message, ex.NaoAutenticado);
+    }
+    catch (HttpRequestException ex)
+    {
+      Erro($"Sem conexão com a API: {ex.Message}");
+    }
+
+    _ = RecarregarPeriodicamenteAsync(_cts.Token);
+  }
+
+  private async Task RecarregarPeriodicamenteAsync(CancellationToken ct)
+  {
+    using var timer = new PeriodicTimer(TimeSpan.FromSeconds(3));
+    try
+    {
+      while (await timer.WaitForNextTickAsync(ct))
+      {
+        try
+        {
+          await AtualizarListaAsync();
+          await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex) when (ex is ApiException or HttpRequestException)
+        {
+          // Falha momentânea: tenta no próximo ciclo.
+        }
+      }
+    }
+    catch (OperationCanceledException)
+    {
+    }
+  }
+
+  private async Task AtualizarListaAsync()
+  {
+    _partidas = await Api.ListarPartidasAsync(_cts.Token);
+    if (_selecionada is not null)
+    {
+      _selecionada = _partidas.FirstOrDefault(p => p.PartidaId == _selecionada.PartidaId);
+    }
+  }
+
+  private void AtualizarRecentes() =>
+    _recentes = Credenciais.PartidasRecentes.Where(r => _ativos.Any(a => a.JogadorId == r.JogadorId)).Take(5).ToList();
+
+  private void TrocarPerfil(ChangeEventArgs e)
+  {
+    if (Guid.TryParse(e.Value?.ToString(), out var id))
+    {
+      _jogador = _ativos.FirstOrDefault(p => p.JogadorId == id) ?? _jogador;
+      AtualizarRecentes();
+    }
+  }
+
+  private async Task CriarAsync()
+  {
+    await Executar(async () =>
+    {
+      using var sessao = await SessaoPartida.CriarPartidaAsync(Api, _jogador!.JogadorId, _alvo);
+      Credenciais.RegistrarPartida(sessao.PartidaId, _jogador.JogadorId);
+      Nav.NavigateTo($"/mesa/{sessao.PartidaId}?jogador={_jogador.JogadorId}");
+    });
+  }
+
+  private async Task EntrarAsync()
+  {
+    await Executar(async () =>
+    {
+      using var sessao = await SessaoPartida.EntrarAsync(Api, _selecionada!, _jogador!.JogadorId);
+      Credenciais.RegistrarPartida(sessao.PartidaId, _jogador.JogadorId);
+      Nav.NavigateTo($"/mesa/{sessao.PartidaId}?jogador={_jogador.JogadorId}");
+    });
+  }
+
+  private async Task Executar(Func<Task> acao)
+  {
+    _ocupado = true;
+    try
+    {
+      await acao();
+    }
+    catch (ApiException ex)
+    {
+      Erro(ex.Message, ex.NaoAutenticado);
+      await AtualizarListaAsync();
+    }
+    catch (Exception ex) when (ex is HttpRequestException or ArgumentException or InvalidOperationException)
+    {
+      Erro(ex.Message);
+    }
+    finally
+    {
+      _ocupado = false;
+    }
+  }
+
+  private void Erro(string mensagem, bool naoAutenticado = false)
+  {
+    _mensagem = mensagem;
+    _erro = true;
+    _naoAutenticado = naoAutenticado;
+  }
+
+  public void Dispose()
+  {
+    _cts.Cancel();
+    _cts.Dispose();
+  }
+}

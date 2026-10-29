@@ -1,0 +1,162 @@
+@page "/"
+@inject GerenciadorPerfis Perfis
+@inject ICredenciaisCliente Credenciais
+@inject NavigationManager Nav
+
+<PageTitle>Conta · Dominó Ponta de Quina</PageTitle>
+
+<section class="grade-duas">
+  <div class="painel">
+    <h1>Entrar</h1>
+    <p class="sutil">O token chega por e-mail e pode ser reutilizado até ser revogado. Ele fica guardado neste computador.</p>
+
+    @if (_sessao is not null)
+    {
+      <div class="cartao-sessao">
+        <div class="avatar grande">@Iniciais(Credenciais.Email)</div>
+        <div>
+          <strong>Conectado</strong>
+          <div class="sutil">@(Credenciais.Email ?? "conta FIAP")</div>
+          <div class="sutil pequeno">Usuário @_sessao.UsuarioId</div>
+        </div>
+      </div>
+      <div class="linha-botoes">
+        <a class="botao primario" href="/perfis">Escolher perfil ›</a>
+        <button class="botao" @onclick="() => SairAsync(false)">Trocar token</button>
+        <button class="botao perigo" @onclick="() => SairAsync(true)">Revogar token</button>
+      </div>
+    }
+    else
+    {
+      <label>1. Solicite o token com seu e-mail FIAP</label>
+      <div class="linha-campo">
+        <input type="email" placeholder="aluno@fiap.com.br" @bind="_email" @bind:event="oninput" />
+        <button class="botao" disabled="@(_ocupado || string.IsNullOrWhiteSpace(_email))" @onclick="SolicitarAsync">Enviar</button>
+      </div>
+
+      <label>2. Cole o token recebido</label>
+      <div class="linha-campo">
+        <input type="password" placeholder="token" @bind="_token" @bind:event="oninput" />
+        <button class="botao primario" disabled="@(_ocupado || string.IsNullOrWhiteSpace(_token))" @onclick="EntrarAsync">Entrar</button>
+      </div>
+    }
+
+    <Aviso Mensagem="@_mensagem" Erro="@_erro" />
+  </div>
+
+  <div class="painel">
+    <h2>Configuração</h2>
+    <label>Endereço base da API</label>
+    <div class="linha-campo">
+      <input @bind="_url" />
+      <button class="botao" @onclick="SalvarUrl">Salvar</button>
+    </div>
+    <p class="sutil pequeno">
+      Swagger: <a href="@($"{Credenciais.UrlBase}/swagger")" target="_blank">@($"{Credenciais.UrlBase}/swagger")</a>
+    </p>
+    <h3>Como funciona</h3>
+    <ol class="passos">
+      <li>Token por e-mail → conta FIAP.</li>
+      <li>Escolha ou crie um <em>perfil</em> e ative-o neste cliente (chave secreta de 64 hex).</li>
+      <li>Crie uma mesa ou entre em uma com vaga.</li>
+      <li>A API decide tudo: distribuição, abertura, validade e pontos. A tela mostra o estado confirmado.</li>
+    </ol>
+  </div>
+</section>
+
+@code {
+  private SessaoResponse? _sessao;
+  private string? _email;
+  private string? _token;
+  private string _url = string.Empty;
+  private string? _mensagem;
+  private bool _erro;
+  private bool _ocupado;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _url = Credenciais.UrlBase;
+    _email = Credenciais.Email;
+    if (Perfis.PossuiToken)
+    {
+      try
+      {
+        _sessao = await Perfis.EntrarComTokenAsync(Credenciais.Token!);
+      }
+      catch (ApiException ex)
+      {
+        Informar(ex.Message, true);
+      }
+      catch (HttpRequestException ex)
+      {
+        Informar($"Não foi possível falar com a API: {ex.Message}", true);
+      }
+    }
+  }
+
+  private async Task SolicitarAsync()
+  {
+    await Executar(async () =>
+    {
+      await Perfis.SolicitarTokenAsync(_email!);
+      Informar($"Pedido aceito. Confira a caixa de entrada de {_email}.", false);
+    });
+  }
+
+  private async Task EntrarAsync()
+  {
+    await Executar(async () =>
+    {
+      _sessao = await Perfis.EntrarComTokenAsync(_token!);
+      _token = null;
+      Informar("Token válido e guardado.", false);
+    });
+  }
+
+  private async Task SairAsync(bool revogar)
+  {
+    await Executar(async () =>
+    {
+      await Perfis.SairAsync(revogar);
+      _sessao = null;
+      Informar(revogar ? "Token revogado na API." : "Token removido deste cliente.", false);
+    });
+  }
+
+  private void SalvarUrl()
+  {
+    Credenciais.UrlBase = _url;
+    Informar("Endereço salvo.", false);
+    Nav.Refresh(forceReload: true);
+  }
+
+  private async Task Executar(Func<Task> acao)
+  {
+    _ocupado = true;
+    try
+    {
+      await acao();
+    }
+    catch (ApiException ex)
+    {
+      Informar(ex.Message, true);
+    }
+    catch (HttpRequestException ex)
+    {
+      Informar($"Sem conexão com a API: {ex.Message}", true);
+    }
+    finally
+    {
+      _ocupado = false;
+    }
+  }
+
+  private void Informar(string mensagem, bool erro)
+  {
+    _mensagem = mensagem;
+    _erro = erro;
+  }
+
+  internal static string Iniciais(string? texto) =>
+    string.IsNullOrWhiteSpace(texto) ? "?" : string.Concat(texto.Split(new[] { '.', '@', ' ', '_' }, StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpperInvariant(p[0])));
+}

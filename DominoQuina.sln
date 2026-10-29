@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{AFEABC59-E5C1-408C-A85E-16E40838FD41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DominoQuina.Core", "src\DominoQuina.Core\DominoQuina.Core.csproj", "{7DEB7781-B94D-405C-A893-4B5C7EFCBD07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DominoQuina.Cli", "src\DominoQuina.Cli\DominoQuina.Cli.csproj", "{48B4C01B-C91F-4F40-A652-0FDFE9906B51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DominoQuina.Web", "src\DominoQuina.Web\DominoQuina.Web.csproj", "{A58BB854-08EC-48BA-890F-1BD5CD81586D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{73F58395-2957-4C31-8F4B-42895015966E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DominoQuina.Simulador", "tools\DominoQuina.Simulador\DominoQuina.Simulador.csproj", "{CA8B727C-94B2-4517-A1CE-A675BA3F14DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{070ADD09-49E5-4DBD-B52A-5C052D7A0BD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DominoQuina.Tests", "tests\DominoQuina.Tests\DominoQuina.Tests.csproj", "{A82E5A54-E63B-4C62-9ED0-38E5784D13B7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7DEB7781-B94D-405C-A893-4B5C7EFCBD07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DEB7781-B94D-405C-A893-4B5C7EFCBD07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DEB7781-B94D-405C-A893-4B5C7EFCBD07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DEB7781-B94D-405C-A893-4B5C7EFCBD07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48B4C01B-C91F-4F40-A652-0FDFE9906B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48B4C01B-C91F-4F40-A652-0FDFE9906B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48B4C01B-C91F-4F40-A652-0FDFE9906B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48B4C01B-C91F-4F40-A652-0FDFE9906B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A58BB854-08EC-48BA-890F-1BD5CD81586D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A58BB854-08EC-48BA-890F-1BD5CD81586D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A58BB854-08EC-48BA-890F-1BD5CD81586D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A58BB854-08EC-48BA-890F-1BD5CD81586D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA8B727C-94B2-4517-A1CE-A675BA3F14DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA8B727C-94B2-4517-A1CE-A675BA3F14DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA8B727C-94B2-4517-A1CE-A675BA3F14DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA8B727C-94B2-4517-A1CE-A675BA3F14DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A82E5A54-E63B-4C62-9ED0-38E5784D13B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A82E5A54-E63B-4C62-9ED0-38E5784D13B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A82E5A54-E63B-4C62-9ED0-38E5784D13B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A82E5A54-E63B-4C62-9ED0-38E5784D13B7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7DEB7781-B94D-405C-A893-4B5C7EFCBD07} = {AFEABC59-E5C1-408C-A85E-16E40838FD41}
+		{48B4C01B-C91F-4F40-A652-0FDFE9906B51} = {AFEABC59-E5C1-408C-A85E-16E40838FD41}
+		{A58BB854-08EC-48BA-890F-1BD5CD81586D} = {AFEABC59-E5C1-408C-A85E-16E40838FD41}
+		{CA8B727C-94B2-4517-A1CE-A675BA3F14DC} = {73F58395-2957-4C31-8F4B-42895015966E}
+		{A82E5A54-E63B-4C62-9ED0-38E5784D13B7} = {070ADD09-49E5-4DBD-B52A-5C052D7A0BD8}
+	EndGlobalSection
+EndGlobal

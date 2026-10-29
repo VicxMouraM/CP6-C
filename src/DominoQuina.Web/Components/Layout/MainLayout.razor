@@ -1,0 +1,23 @@
+@inherits LayoutComponentBase
+@inject ICredenciaisCliente Credenciais
+
+<header class="topo">
+  <a class="marca" href="/">
+    <span class="marca-pedra"><i></i><i></i></span>
+    <span>Dominó <strong>Ponta de Quina</strong></span>
+  </a>
+  <nav>
+    <NavLink href="/" Match="NavLinkMatch.All">Conta</NavLink>
+    <NavLink href="/perfis">Perfis</NavLink>
+    <NavLink href="/sala">Partidas</NavLink>
+  </nav>
+  <span class="api" title="Endereço da API">@Credenciais.UrlBase.Replace("https://", string.Empty)</span>
+</header>
+
+<main class="conteudo">
+  @Body
+</main>
+
+<div id="blazor-error-ui">
+  Ocorreu um erro inesperado. <a href="" class="reload">Recarregar</a>
+</div>

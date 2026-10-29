@@ -1,0 +1,16 @@
+@if (!string.IsNullOrWhiteSpace(Mensagem))
+{
+  <div class="aviso @(Erro ? "erro" : "ok")" role="status">
+    <span>@Mensagem</span>
+    @if (Erro && NaoAutenticado)
+    {
+      <a href="/">Autenticar novamente</a>
+    }
+  </div>
+}
+
+@code {
+  [Parameter] public string? Mensagem { get; set; }
+  [Parameter] public bool Erro { get; set; }
+  [Parameter] public bool NaoAutenticado { get; set; }
+}

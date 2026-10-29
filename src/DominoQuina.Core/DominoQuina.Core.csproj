@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>DominoQuina.Core</RootNamespace>
+    <Description>Núcleo do cliente do Dominó Ponta de Quina: modelos, cliente HTTP, regras locais, estratégia e jogador autônomo.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DominoQuina.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,124 @@
+@page "/perfis"
+@inject GerenciadorPerfis Gerenciador
+@inject NavigationManager Nav
+
+<PageTitle>Perfis · Dominó Ponta de Quina</PageTitle>
+
+<section class="painel">
+  <div class="cabecalho-painel">
+    <div>
+      <h1>Perfis de jogador</h1>
+      <p class="sutil">Um perfil só pode estar ativo em um cliente por vez. Fechar o app não libera o perfil: use “Liberar”.</p>
+    </div>
+    <button class="botao" @onclick="CarregarAsync" disabled="@_ocupado">↻ Atualizar</button>
+  </div>
+
+  <Aviso Mensagem="@_mensagem" Erro="@_erro" NaoAutenticado="@_naoAutenticado" />
+
+  <div class="lista-perfis">
+    @foreach (var item in _perfis)
+    {
+      var p = item.Perfil;
+      <article class="cartao-perfil @(item.AtivoNesteCliente ? "ativo" : string.Empty)">
+        <div class="avatar">@Inicio.Iniciais(p.Nome)</div>
+        <div class="dados">
+          <strong>@p.Nome</strong>
+          <span class="sutil pequeno">@p.JogadorId</span>
+          <span class="selo @(item.AtivoNesteCliente ? "verde" : p.AtivoEmAlgumCliente == true ? "amarelo" : "cinza")">
+            @(item.AtivoNesteCliente ? "Ativo neste cliente" : p.AtivoEmAlgumCliente == true ? "Ativo em outro cliente" : "Livre")
+          </span>
+        </div>
+        <div class="acoes">
+          @if (item.AtivoNesteCliente)
+          {
+            <button class="botao primario" @onclick="@(() => Nav.NavigateTo($"/sala?jogador={p.JogadorId}"))">Jogar ›</button>
+            <button class="botao" disabled="@_ocupado" @onclick="() => AtivarAsync(p.JogadorId)" title="Repete a ativação com a mesma chave">Retomar</button>
+            <button class="botao perigo" disabled="@_ocupado" @onclick="() => LiberarAsync(p.JogadorId)">Liberar</button>
+          }
+          else
+          {
+            <button class="botao primario" disabled="@_ocupado" @onclick="() => AtivarAsync(p.JogadorId)">Ativar aqui</button>
+          }
+        </div>
+      </article>
+    }
+    @if (_perfis.Count == 0 && !_ocupado)
+    {
+      <p class="sutil">Nenhum perfil ainda. Crie o primeiro abaixo.</p>
+    }
+  </div>
+
+  <h2>Novo perfil</h2>
+  <div class="linha-campo">
+    <input placeholder="Nome do perfil (1 a 150 caracteres)" maxlength="150" @bind="_nome" @bind:event="oninput" />
+    <button class="botao primario" disabled="@(_ocupado || string.IsNullOrWhiteSpace(_nome))" @onclick="CriarAsync">Criar</button>
+  </div>
+</section>
+
+@code {
+  private IReadOnlyList<PerfilLocal> _perfis = [];
+  private string? _nome;
+  private string? _mensagem;
+  private bool _erro;
+  private bool _naoAutenticado;
+  private bool _ocupado;
+
+  protected override Task OnInitializedAsync() => CarregarAsync();
+
+  private Task CarregarAsync() => Executar(async () => _perfis = await Gerenciador.ListarAsync(), null);
+
+  private Task CriarAsync() => Executar(async () =>
+  {
+    var perfil = await Gerenciador.CriarAsync(_nome!);
+    _nome = null;
+    await Gerenciador.AtivarAsync(perfil.JogadorId);
+    _perfis = await Gerenciador.ListarAsync();
+  }, "Perfil criado e ativado neste cliente.");
+
+  private Task AtivarAsync(Guid id) => Executar(async () =>
+  {
+    await Gerenciador.AtivarAsync(id);
+    _perfis = await Gerenciador.ListarAsync();
+  }, "Perfil ativo neste cliente. A chave de ativação foi guardada com segurança.");
+
+  private Task LiberarAsync(Guid id) => Executar(async () =>
+  {
+    await Gerenciador.DesativarAsync(id);
+    _perfis = await Gerenciador.ListarAsync();
+  }, "Perfil liberado. Outro cliente já pode ativá-lo com uma chave nova.");
+
+  private async Task Executar(Func<Task> acao, string? sucesso)
+  {
+    _ocupado = true;
+    _naoAutenticado = false;
+    try
+    {
+      await acao();
+      if (sucesso is not null)
+      {
+        _mensagem = sucesso;
+        _erro = false;
+      }
+    }
+    catch (ApiException ex) when (ex.JogadorJaAtivo)
+    {
+      _mensagem = "Este perfil está ativo em outro cliente (409 JOGADOR_JA_ATIVO). Libere-o no outro cliente ou use outro perfil.";
+      _erro = true;
+    }
+    catch (ApiException ex)
+    {
+      _mensagem = ex.Message;
+      _erro = true;
+      _naoAutenticado = ex.NaoAutenticado;
+    }
+    catch (Exception ex) when (ex is HttpRequestException or ArgumentException or InvalidOperationException)
+    {
+      _mensagem = ex.Message;
+      _erro = true;
+    }
+    finally
+    {
+      _ocupado = false;
+    }
+  }
+}

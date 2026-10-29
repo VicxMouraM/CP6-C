@@ -1,0 +1,45 @@
+@* Pedra de dominó desenhada em HTML/CSS. Vertical para duplas na mesa e para a mão do jogador. *@
+
+<button type="button"
+        class="pedra @(Vertical ? "vertical" : "horizontal") @(Oculta ? "oculta" : string.Empty) @Classe"
+        title="@(Titulo ?? (Oculta ? "Pedra do adversário" : $"[{A}|{B}]"))"
+        disabled="@(!OnClick.HasDelegate || Desabilitada)"
+        @onclick="OnClick">
+  @if (!Oculta)
+  {
+    <span class="metade">@Pontos(A)</span>
+    <span class="divisor"></span>
+    <span class="metade">@Pontos(B)</span>
+  }
+</button>
+
+@code {
+  [Parameter] public int A { get; set; }
+  [Parameter] public int B { get; set; }
+  [Parameter] public bool Vertical { get; set; }
+  [Parameter] public bool Oculta { get; set; }
+  [Parameter] public bool Desabilitada { get; set; }
+  [Parameter] public string? Classe { get; set; }
+  [Parameter] public string? Titulo { get; set; }
+  [Parameter] public EventCallback OnClick { get; set; }
+
+  // Posições (0..8) ocupadas em uma grade 3x3 para cada valor.
+  private static readonly int[][] s_vertical =
+  [
+    [], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8],
+  ];
+
+  private static readonly int[][] s_horizontal =
+  [
+    [], [4], [2, 6], [2, 4, 6], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 1, 2, 6, 7, 8],
+  ];
+
+  private RenderFragment Pontos(int valor) => __builder =>
+  {
+    var cheias = (Vertical ? s_vertical : s_horizontal)[Math.Clamp(valor, 0, 6)];
+    for (var i = 0; i < 9; i++)
+    {
+      <i class="@(cheias.Contains(i) ? "pip" : "vazio")"></i>
+    }
+  };
+}

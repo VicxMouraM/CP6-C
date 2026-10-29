@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>DominoQuina.Simulador</RootNamespace>
+    <Description>Simulador local da API (mesmo contrato e regras) para testes automatizados e ensaio offline. Não substitui a API oficial.</Description>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DominoQuina.Tests" />
+  </ItemGroup>
+
+</Project>

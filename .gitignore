@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+TestResults/
+coverage*/
+*.log
+# Segredos locais (token e chaves de ativação) nunca vão para o repositório
+.domino-quina/
+config.local.json
