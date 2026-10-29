@@ -9,7 +9,7 @@ envia apenas ações permitidas e acompanha o estado até o resultado — com **
 > **Checkpoint 6 — entrega até 02/11/2026, 23:59.**
 > 🎥 **Vídeo de apresentação:** _cole aqui o link do vídeo_
 >
-> **Integrantes:** _Nome Completo (RM00000)_ · _Nome Completo (RM00000)_ · _Nome Completo (RM00000)_
+> **Integrantes:** _Victoria Moura (RM555474)_
 
 ---
 
