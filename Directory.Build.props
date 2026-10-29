@@ -9,6 +9,6 @@
     <!-- CS1591: membros públicos sem XML doc (aplicado apenas a UI e testes, ver cada .csproj). -->
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <Authors>Grupo FIAP - Checkpoint 6</Authors>
+    <Authors>Victoria Moura - 555474</Authors>
   </PropertyGroup>
 </Project>
