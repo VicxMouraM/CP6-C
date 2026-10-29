@@ -7,7 +7,7 @@ envia apenas ações permitidas e acompanha o estado até o resultado — com **
 ![Mesa durante o turno](docs/telas/mesa.png)
 
 > **Checkpoint 6 — entrega até 02/11/2026, 23:59.**
-> 🎥 **Vídeo de apresentação:** _cole aqui o link do vídeo_
+> 🎥 **Vídeo de apresentação:** (https://youtu.be/llHll5-5D0k)
 >
 > **Integrantes:** _Victoria Moura (RM555474)_
 
